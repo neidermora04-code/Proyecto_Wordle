@@ -1,0 +1,92 @@
+{
+    "ultima_actualizacion": "2026-10-19 17:24:34",
+    "jugadores": {
+        "ANDRES": {
+            "alias": "Andres",
+            "categoria": "VIP",
+            "activo": true,
+            "tipo": "Registrado",
+            "partidas_jugadas": 3,
+            "partidas_ganadas": 2,
+            "puntaje_acumulado": 1290,
+            "racha_actual": 0,
+            "porcentaje_victorias": 66.67
+        },
+        "FELIPE NAVARRETE": {
+            "alias": "Felipe Navarrete",
+            "categoria": "VIP",
+            "activo": true,
+            "tipo": "Registrado",
+            "partidas_jugadas": 1,
+            "partidas_ganadas": 0,
+            "puntaje_acumulado": 0,
+            "racha_actual": 0,
+            "porcentaje_victorias": 0.0
+        }
+    },
+    "partidas": [
+        {
+            "id_partida": "PART-001",
+            "fecha": "2026-10-19 15:48:48",
+            "jugador": "Andres",
+            "tipo_jugador": "Registrado",
+            "palabra_secreta": "LINUX",
+            "gano": true,
+            "estado": "VICTORIA",
+            "intentos_usados": 2,
+            "max_intentos": 6,
+            "dificultad": "Normal (6 intentos)",
+            "puntaje": 660,
+            "palabras_intentadas": []
+        },
+        {
+            "id_partida": "PART-002",
+            "fecha": "2026-10-19 16:26:06",
+            "jugador": "Felipe Navarrete",
+            "tipo_jugador": "Registrado",
+            "palabra_secreta": "SHELL",
+            "gano": false,
+            "estado": "DERROTA",
+            "intentos_usados": 7,
+            "max_intentos": 6,
+            "dificultad": "Normal (6 intentos)",
+            "puntaje": 0,
+            "palabras_intentadas": []
+        },
+        {
+            "id_partida": "PART-003",
+            "fecha": "2026-10-19 17:21:00",
+            "jugador": "Andres",
+            "tipo_jugador": "Registrado",
+            "palabra_secreta": "MUJER",
+            "gano": false,
+            "estado": "DERROTA",
+            "intentos_usados": 4,
+            "max_intentos": 4,
+            "dificultad": "Experto (4 intentos)",
+            "puntaje": 0,
+            "palabras_intentadas": []
+        },
+        {
+            "id_partida": "PART-004",
+            "fecha": "2026-10-19 17:24:33",
+            "jugador": "Invitado",
+            "tipo_jugador": "Invitado",
+            "palabra_secreta": "TINTA",
+            "gano": true,
+            "estado": "VICTORIA",
+            "intentos_usados": 6,
+            "max_intentos": 6,
+            "dificultad": "Normal (6 intentos)",
+            "puntaje": 90,
+            "palabras_intentadas": [
+                "AIREO",
+                "AIREO",
+                "PISTA",
+                "FINTA",
+                "CINTA",
+                "TINTA"
+            ]
+        }
+    ]
+}

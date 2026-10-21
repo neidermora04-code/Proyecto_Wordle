@@ -1,0 +1,5 @@
+ID_Partida,Fecha,Jugador,Tipo_Jugador,Palabra_Secreta,Estado,Intentos_Usados,Max_Intentos,Dificultad,Puntaje,Secuencia_Intentos
+PART-001,2026-10-19 15:48:48,Andres,Registrado,LINUX,VICTORIA,2,6,Normal (6 intentos),660,
+PART-002,2026-10-19 16:26:06,Felipe Navarrete,Registrado,SHELL,DERROTA,7,6,Normal (6 intentos),0,
+PART-003,2026-10-19 17:21:00,Andres,Registrado,MUJER,DERROTA,4,4,Experto (4 intentos),0,
+PART-004,2026-10-19 17:24:33,Invitado,Invitado,TINTA,VICTORIA,6,6,Normal (6 intentos),90,AIREO -> AIREO -> PISTA -> FINTA -> CINTA -> TINTA

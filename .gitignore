@@ -1,0 +1,21 @@
+# =====================================================================
+# ARCHIVOS IGNORADOS POR GIT (Seguridad para Repositorio Público)
+# =====================================================================
+
+# Variables de entorno y credenciales sensibles (NUNCA subir a GitHub público)
+.env
+credentials.json
+*service-account*.json
+*wordle-512120*.json
+
+# Entorno virtual de Python y caché
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Configuraciones de editores (PyCharm / VSCode)
+.idea/
+.vscode/
