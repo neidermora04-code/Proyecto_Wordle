@@ -6,6 +6,8 @@ Módulo de Persistencia Híbrida y Sincronización Competitiva en Tiempo Real:
 
 import csv
 import json
+import urllib.parse
+import urllib.request
 from datetime import datetime
 from pathlib import Path
 from typing import Set, List, Dict, Any, Tuple
@@ -29,6 +31,7 @@ from config import (
     HOJAS_GOOGLE_SHEETS,
     PALABRAS_RESPALDO,
     ID_DOCUMENTO_SHEETS,
+    URL_WEBAPP_SHEETS,
     obtener_credenciales_desde_env
 )
 from validaciones import ValidadorDatos
@@ -226,6 +229,8 @@ class GestorGoogleSheets:
         self._cliente: Any = None
         self._documento: Any = None
         self._modo_online: bool = False
+        self._usar_webapp: bool = False
+        self._url_webapp: str = URL_WEBAPP_SHEETS.strip()
 
         self._conectar()
 
@@ -233,48 +238,75 @@ class GestorGoogleSheets:
     def esta_conectado(self) -> bool:
         return self._modo_online
 
+    def _peticion_webapp_get(self, nombre_hoja: str) -> List[List[str]]:
+        """Obtiene todas las filas de una pestaña mediante la Web App de Google Apps Script."""
+        if not self._url_webapp:
+            return []
+        url = f"{self._url_webapp}?hoja={urllib.parse.quote(nombre_hoja)}"
+        req = urllib.request.Request(url, method="GET")
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            datos = json.loads(resp.read().decode("utf-8"))
+            if isinstance(datos, dict) and datos.get("ok"):
+                return datos.get("filas", [])
+        return []
+
+    def _peticion_webapp_post(self, payload: Dict[str, Any]) -> bool:
+        """Envía una operación de escritura (append o replace) mediante la Web App de Google Apps Script."""
+        if not self._url_webapp:
+            return False
+        cuerpo = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(
+            self._url_webapp,
+            data=cuerpo,
+            headers={"Content-Type": "application/json"},
+            method="POST"
+        )
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            datos = json.loads(resp.read().decode("utf-8"))
+            return bool(isinstance(datos, dict) and datos.get("ok"))
+
     def _conectar(self) -> None:
         """
-        Autentica la Service Account priorizando las variables de entorno del archivo `.env`
-        (`service_account_from_dict`) o el archivo físico `credentials.json` como respaldo.
+        Autentica la Service Account priorizando `.env` / `credentials.json` o
+        conecta automáticamente vía `URL_WEBAPP_SHEETS` para cualquier usuario que clone desde GitHub.
         """
         intento_completado = False
-        if not GSPREAD_DISPONIBLE:
-            self._modo_online = False
-            return
-
         credenciales_env = obtener_credenciales_desde_env()
-        if credenciales_env is None and not self._ruta_credenciales.exists():
-            self._modo_online = False
-            return
+        tiene_credenciales_locales = (credenciales_env is not None or self._ruta_credenciales.exists())
 
-        try:
-            if credenciales_env is not None:
-                self._cliente = gspread.service_account_from_dict(credenciales_env)
-            else:
-                self._cliente = gspread.service_account(filename=str(self._ruta_credenciales))
-
+        if GSPREAD_DISPONIBLE and tiene_credenciales_locales:
             try:
-                self._documento = self._cliente.open_by_key(ID_DOCUMENTO_SHEETS)
-            except SpreadsheetNotFound:
-                self._documento = self._cliente.open(self._nombre_documento)
-        except FileNotFoundError:
-            print(f"[Error] Archivo de credenciales no encontrado: {self._ruta_credenciales}")
-            self._modo_online = False
-        except SpreadsheetNotFound:
-            print(f"[Error] No se encontró la hoja '{self._nombre_documento}' en Google Drive.")
-            self._modo_online = False
-        except GSpreadException as error_api:
-            print(f"[Error API Google Sheets] {error_api}")
-            self._modo_online = False
-        except Exception as error_inesperado:
-            print(f"[Error Crítico Google Sheets] {error_inesperado}")
-            self._modo_online = False
+                if credenciales_env is not None:
+                    self._cliente = gspread.service_account_from_dict(credenciales_env)
+                else:
+                    self._cliente = gspread.service_account(filename=str(self._ruta_credenciales))
+
+                try:
+                    self._documento = self._cliente.open_by_key(ID_DOCUMENTO_SHEETS)
+                except SpreadsheetNotFound:
+                    self._documento = self._cliente.open(self._nombre_documento)
+            except Exception:
+                self._modo_online = False
+            else:
+                self._modo_online = True
+                self._usar_webapp = False
+                return
+
+        if self._url_webapp:
+            try:
+                self._peticion_webapp_get(HOJAS_GOOGLE_SHEETS[0])
+            except Exception:
+                self._modo_online = False
+                self._usar_webapp = False
+            else:
+                self._modo_online = True
+                self._usar_webapp = True
         else:
-            self._modo_online = True
-        finally:
-            intento_completado = True
-            _ = intento_completado
+            self._modo_online = False
+            self._usar_webapp = False
+
+        intento_completado = True
+        _ = intento_completado
 
     # =========================================================================
     # 1. SINCRONIZACIÓN DE PALABRAS (PESTAÑA 'Palabras')
@@ -284,30 +316,40 @@ class GestorGoogleSheets:
         longitud_requerida: int = CONFIG_JUEGO[0]
         nombre_hoja_palabras: str = HOJAS_GOOGLE_SHEETS[0]
 
-        if not self._modo_online or self._documento is None:
+        if not self._modo_online:
             return set(palabras_locales) if palabras_locales else set(PALABRAS_RESPALDO)
 
         try:
-            hoja = self._documento.worksheet(nombre_hoja_palabras)
-            valores_crudos: List[str] = hoja.col_values(1)
+            if self._usar_webapp:
+                filas = self._peticion_webapp_get(nombre_hoja_palabras)
+                valores_crudos: List[str] = [f[0] for f in filas if f]
+            else:
+                hoja = self._documento.worksheet(nombre_hoja_palabras)
+                valores_crudos = hoja.col_values(1)
 
             palabras_nube: Set[str] = {
                 ValidadorDatos.normalizar_palabra(p)
                 for p in valores_crudos
                 if p and p.strip().isalpha() and len(ValidadorDatos.normalizar_palabra(p)) == longitud_requerida
             }
-        except (WorksheetNotFound, GSpreadException, Exception):
+        except Exception:
             return set(palabras_locales) if palabras_locales else set(PALABRAS_RESPALDO)
         else:
             return palabras_nube.union(palabras_locales) if palabras_nube else set(palabras_locales)
 
     def agregar_palabra_nube(self, nueva_palabra: str) -> bool:
         """Añade una palabra nueva al final de la pestaña 'Palabras' con `append_row()`."""
-        if not self._modo_online or self._documento is None:
+        if not self._modo_online:
             return False
 
         nombre_hoja_palabras: str = HOJAS_GOOGLE_SHEETS[0]
         try:
+            if self._usar_webapp:
+                return self._peticion_webapp_post({
+                    "accion": "append",
+                    "hoja": nombre_hoja_palabras,
+                    "fila": [nueva_palabra.upper()]
+                })
             hoja = self._documento.worksheet(nombre_hoja_palabras)
             hoja.append_row([nueva_palabra.upper()], value_input_option="USER_ENTERED")
         except Exception:
@@ -339,10 +381,17 @@ class GestorGoogleSheets:
             datos_partida.get("id_partida", "")
         ]
 
-        if not self._modo_online or self._documento is None:
+        if not self._modo_online:
             return False
 
         try:
+            if self._usar_webapp:
+                return self._peticion_webapp_post({
+                    "accion": "append",
+                    "hoja": nombre_hoja_puntajes,
+                    "fila": fila_nuevo_registro
+                })
+
             try:
                 hoja_puntajes = self._documento.worksheet(nombre_hoja_puntajes)
             except WorksheetNotFound:
@@ -351,7 +400,7 @@ class GestorGoogleSheets:
 
             # REQUISITO CLAVE: Uso de append_row()
             hoja_puntajes.append_row(fila_nuevo_registro, value_input_option="USER_ENTERED")
-        except (GSpreadException, Exception) as error_escritura:
+        except Exception as error_escritura:
             print(f"\n[Error API Google Sheets] No se pudo subir fila de partida: {error_escritura}")
             return False
         else:
@@ -362,13 +411,16 @@ class GestorGoogleSheets:
         Descarga el historial completo de partidas jugadas por todos los competidores
         desde la pestaña 'Puntajes' de Google Sheets.
         """
-        if not self._modo_online or self._documento is None:
+        if not self._modo_online:
             return []
 
         nombre_hoja_puntajes: str = HOJAS_GOOGLE_SHEETS[1]
         try:
-            hoja = self._documento.worksheet(nombre_hoja_puntajes)
-            filas = hoja.get_all_values()
+            if self._usar_webapp:
+                filas = self._peticion_webapp_get(nombre_hoja_puntajes)
+            else:
+                hoja = self._documento.worksheet(nombre_hoja_puntajes)
+                filas = hoja.get_all_values()
         except Exception:
             return []
 
@@ -379,10 +431,10 @@ class GestorGoogleSheets:
         for idx, fila in enumerate(filas[1:], start=1):
             if not fila or len(fila) < 6:
                 continue
-            fecha = fila[0].strip()
-            jugador = fila[1].strip() or "Anónimo"
-            palabra = fila[2].strip().upper() or "ARBOL"
-            estado_txt = fila[3].strip().upper()
+            fecha = str(fila[0]).strip()
+            jugador = str(fila[1]).strip() or "Anónimo"
+            palabra = str(fila[2]).strip().upper() or "ARBOL"
+            estado_txt = str(fila[3]).strip().upper()
             gano = (estado_txt == "VICTORIA")
             try:
                 intentos = int(fila[4])
@@ -393,9 +445,9 @@ class GestorGoogleSheets:
             except ValueError:
                 puntaje = 0
 
-            dificultad = fila[6].strip() if len(fila) > 6 and fila[6].strip() else "Normal (6 intentos)"
-            tipo_jugador = fila[7].strip() if len(fila) > 7 and fila[7].strip() else "Registrado"
-            id_partida = fila[8].strip() if len(fila) > 8 and fila[8].strip() else f"PART-{idx:03d}"
+            dificultad = str(fila[6]).strip() if len(fila) > 6 and str(fila[6]).strip() else "Normal (6 intentos)"
+            tipo_jugador = str(fila[7]).strip() if len(fila) > 7 and str(fila[7]).strip() else "Registrado"
+            id_partida = str(fila[8]).strip() if len(fila) > 8 and str(fila[8]).strip() else f"PART-{idx:03d}"
 
             max_int = 7 if "Fácil" in dificultad else (4 if "Experto" in dificultad else 6)
 
@@ -424,13 +476,16 @@ class GestorGoogleSheets:
         Descarga todos los jugadores registrados y sus estadísticas competitivas
         desde la pestaña 'Jugadores' de Google Sheets.
         """
-        if not self._modo_online or self._documento is None:
+        if not self._modo_online:
             return {}
 
         nombre_hoja_jugadores: str = HOJAS_GOOGLE_SHEETS[2]
         try:
-            hoja = self._documento.worksheet(nombre_hoja_jugadores)
-            filas = hoja.get_all_values()
+            if self._usar_webapp:
+                filas = self._peticion_webapp_get(nombre_hoja_jugadores)
+            else:
+                hoja = self._documento.worksheet(nombre_hoja_jugadores)
+                filas = hoja.get_all_values()
         except WorksheetNotFound:
             try:
                 hoja = self._documento.add_worksheet(title=nombre_hoja_jugadores, rows=200, cols=10)
@@ -448,11 +503,11 @@ class GestorGoogleSheets:
         for fila in filas[1:]:
             if not fila or len(fila) < 9:
                 continue
-            alias = fila[1].strip()
+            alias = str(fila[1]).strip()
             if not alias:
                 continue
-            categoria = fila[2].strip() or "Estándar"
-            activo = (fila[3].strip().lower() != "inactivo")
+            categoria = str(fila[2]).strip() or "Estándar"
+            activo = (str(fila[3]).strip().lower() != "inactivo")
             try:
                 pj = int(fila[4])
             except ValueError:
@@ -487,30 +542,37 @@ class GestorGoogleSheets:
         Actualiza la pestaña 'Jugadores' en Google Sheets con la tabla de posiciones
         ordenada por puntaje (Ranking Competitivo Global en tiempo real).
         """
-        if not self._modo_online or self._documento is None:
+        if not self._modo_online:
             return False
 
         nombre_hoja_jugadores: str = HOJAS_GOOGLE_SHEETS[2]
+        matriz_filas: List[List[Any]] = [self.ENCABEZADOS_JUGADORES]
+        for posicion, j in enumerate(jugadores_ordenados, start=1):
+            estado_str = "Activo" if j.get("activo", True) else "Inactivo"
+            matriz_filas.append([
+                posicion,
+                j.get("alias", ""),
+                j.get("categoria", "Estándar"),
+                estado_str,
+                j.get("partidas_jugadas", 0),
+                j.get("partidas_ganadas", 0),
+                f"{j.get('porcentaje_victorias', 0.0)}%",
+                j.get("racha_actual", 0),
+                j.get("puntaje_acumulado", 0)
+            ])
+
         try:
+            if self._usar_webapp:
+                return self._peticion_webapp_post({
+                    "accion": "replace",
+                    "hoja": nombre_hoja_jugadores,
+                    "filas": matriz_filas
+                })
+
             try:
                 hoja = self._documento.worksheet(nombre_hoja_jugadores)
             except WorksheetNotFound:
                 hoja = self._documento.add_worksheet(title=nombre_hoja_jugadores, rows=200, cols=10)
-
-            matriz_filas: List[List[Any]] = [self.ENCABEZADOS_JUGADORES]
-            for posicion, j in enumerate(jugadores_ordenados, start=1):
-                estado_str = "Activo" if j.get("activo", True) else "Inactivo"
-                matriz_filas.append([
-                    posicion,
-                    j.get("alias", ""),
-                    j.get("categoria", "Estándar"),
-                    estado_str,
-                    j.get("partidas_jugadas", 0),
-                    j.get("partidas_ganadas", 0),
-                    f"{j.get('porcentaje_victorias', 0.0)}%",
-                    j.get("racha_actual", 0),
-                    j.get("puntaje_acumulado", 0)
-                ])
 
             hoja.clear()
             hoja.update(range_name=f"A1:I{len(matriz_filas)}", values=matriz_filas)

@@ -46,6 +46,10 @@ ID_DOCUMENTO_SHEETS: str = os.getenv(
     "17_TzEIOid9tCwlmm0NzOPqM2sIY6pix9Z_raB41usOc"
 )
 URL_DOCUMENTO_SHEETS: str = f"https://docs.google.com/spreadsheets/d/{ID_DOCUMENTO_SHEETS}/edit"
+URL_WEBAPP_SHEETS: str = os.getenv(
+    "GOOGLE_WEBAPP_URL",
+    "https://script.google.com/macros/s/AKfycbxyjjETLxdO_9m8hZxQ0fZ39r9OgKOkryKdmaVr-bN4cP7Z4xd8_HW1X4kiozl9ypF1/exec"
+)
 
 
 def obtener_credenciales_desde_env() -> Optional[Dict[str, str]]:
