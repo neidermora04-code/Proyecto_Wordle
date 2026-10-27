@@ -32,3 +32,9 @@
 [2026-10-19 17:24:34] Estado JSON guardado (2 jugadores, 4 partidas, 562 palabras).
 [2026-10-19 17:24:48] Exportación CSV de partidas generada en: /home/andres/Escritorio/Proyecto N,T,N,Y/exportaciones/reporte_partidas.csv
 [2026-10-19 17:24:48] Exportación CSV de ranking generada en: /home/andres/Escritorio/Proyecto N,T,N,Y/exportaciones/ranking_jugadores.csv
+[2026-10-21 14:03:54] Estado JSON guardado (2 jugadores, 4 partidas, 562 palabras).
+[2026-10-21 14:04:08] Estado JSON guardado (2 jugadores, 4 partidas, 562 palabras).
+[2026-10-21 14:04:08] Estado JSON guardado (3 jugadores, 4 partidas, 562 palabras).
+[2026-10-21 14:05:42] Estado JSON guardado (3 jugadores, 5 partidas, 562 palabras).
+[2026-10-21 14:06:46] Estado JSON guardado (3 jugadores, 5 partidas, 562 palabras).
+[2026-10-21 14:06:48] Jugador actualizado en BD: rey
