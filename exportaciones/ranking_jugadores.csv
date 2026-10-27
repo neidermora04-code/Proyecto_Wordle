@@ -1,3 +1,8 @@
 Posicion,Alias,Categoria,Estado,Partidas_Jugadas,Partidas_Ganadas,Porcentaje_Victorias,Racha_Actual,Puntaje_Acumulado
 1,Andres,VIP,Activo,3,2,66.67%,0,1290
-2,Felipe Navarrete,VIP,Activo,1,0,0.0%,0,0
+2,Felipe,Estándar,Activo,2,2,100.0%,2,775
+3,alejo,VIP,Activo,3,2,66.67%,0,738
+4,Pedro Picapiedra,Estándar,Activo,1,1,100.0%,1,325
+5,Felipe Navarrete,VIP,Activo,1,0,0.0%,0,0
+6,rey,vip,Activo,1,0,0.0%,0,0
+7,juanito pepe,Estándar,Activo,1,0,0.0%,0,0

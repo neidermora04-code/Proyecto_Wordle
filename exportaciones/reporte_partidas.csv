@@ -2,4 +2,10 @@ ID_Partida,Fecha,Jugador,Tipo_Jugador,Palabra_Secreta,Estado,Intentos_Usados,Max
 PART-001,2026-10-19 15:48:48,Andres,Registrado,LINUX,VICTORIA,2,6,Normal (6 intentos),660,
 PART-002,2026-10-19 16:26:06,Felipe Navarrete,Registrado,SHELL,DERROTA,7,6,Normal (6 intentos),0,
 PART-003,2026-10-19 17:21:00,Andres,Registrado,MUJER,DERROTA,4,4,Experto (4 intentos),0,
-PART-004,2026-10-19 17:24:33,Invitado,Invitado,TINTA,VICTORIA,6,6,Normal (6 intentos),90,AIREO -> AIREO -> PISTA -> FINTA -> CINTA -> TINTA
+PART-004,2026-10-19 17:24:33,Invitado,Invitado,TINTA,VICTORIA,6,6,Normal (6 intentos),90,
+PART-005,2026-10-21 14:05:41,juanito pepe,Registrado,QUESO,DERROTA,7,7,Fácil (7 intentos),0,
+PART-006,2026-10-21 16:40:30,Felipe,Registrado,GRADO,VICTORIA,3,6,Normal (6 intentos),425,
+PART-007,2026-10-21 16:51:38,Pedro Picapiedra,Registrado,SUCIO,VICTORIA,3,4,Experto (4 intentos),325,
+PART-008,2026-10-21 17:05:19,Felipe,Registrado,PINOS,VICTORIA,3,4,Experto (4 intentos),350,
+PART-009,2026-10-27 12:41:05,alejo,Registrado,RAMAS,VICTORIA,4,6,Normal (6 intentos),420,
+PART-010,2026-10-27 13:48:34,alejo,Registrado,CEDRO,DERROTA,7,7,Fácil (7 intentos),0,

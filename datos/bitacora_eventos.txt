@@ -32,3 +32,21 @@
 [2026-10-19 17:24:34] Estado JSON guardado (2 jugadores, 4 partidas, 562 palabras).
 [2026-10-19 17:24:48] Exportación CSV de partidas generada en: /home/andres/Escritorio/Proyecto N,T,N,Y/exportaciones/reporte_partidas.csv
 [2026-10-19 17:24:48] Exportación CSV de ranking generada en: /home/andres/Escritorio/Proyecto N,T,N,Y/exportaciones/ranking_jugadores.csv
+[2026-10-21 16:56:14] Estado JSON guardado (2 jugadores, 4 partidas, 562 palabras).
+[2026-10-21 16:56:33] Estado JSON guardado (3 jugadores, 4 partidas, 562 palabras).
+[2026-10-21 16:56:33] Jugador registrado en BD local y Google Sheets: alejo (VIP)
+[2026-10-21 17:04:39] Estado JSON guardado (3 jugadores, 5 partidas, 562 palabras).
+[2026-10-27 12:38:32] Estado JSON guardado (7 jugadores, 8 partidas, 562 palabras).
+[2026-10-27 12:38:48] Estado JSON guardado (7 jugadores, 8 partidas, 562 palabras).
+[2026-10-27 12:41:08] Estado JSON guardado (7 jugadores, 9 partidas, 562 palabras).
+[2026-10-27 12:59:36] Estado JSON guardado (7 jugadores, 9 partidas, 562 palabras).
+[2026-10-27 13:48:36] Estado JSON guardado (7 jugadores, 10 partidas, 562 palabras).
+[2026-10-27 13:49:31] Estado JSON guardado (7 jugadores, 10 partidas, 562 palabras).
+[2026-10-27 13:49:45] Estado JSON guardado (7 jugadores, 10 partidas, 562 palabras).
+[2026-10-27 13:52:05] Exportación CSV de partidas generada en: C:\Users\ACER\Desktop\wordle\Proyecto_Wordle\exportaciones\reporte_partidas.csv
+[2026-10-27 13:52:05] Exportación CSV de ranking generada en: C:\Users\ACER\Desktop\wordle\Proyecto_Wordle\exportaciones\ranking_jugadores.csv
+[2026-10-27 13:58:07] Estado JSON guardado (7 jugadores, 10 partidas, 562 palabras).
+[2026-10-27 13:59:23] Estado JSON guardado (7 jugadores, 10 partidas, 562 palabras).
+[2026-10-27 14:12:43] Estado JSON guardado (7 jugadores, 11 partidas, 562 palabras).
+[2026-10-27 14:19:57] Estado JSON guardado (7 jugadores, 11 partidas, 562 palabras).
+[2026-10-27 14:23:55] Estado JSON guardado (7 jugadores, 12 partidas, 562 palabras).
